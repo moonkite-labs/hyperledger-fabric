@@ -1,0 +1,6 @@
+# Hyperledger-Fabric local binaries
+bin/
+builders/
+
+# Wallet
+wallet/
