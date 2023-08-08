@@ -20,13 +20,15 @@ type Config struct {
 	}
 }
 
+// Stops execution if an error is found
 func checkError(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
 
-func createWallet(walletPath string) *gateway.Wallet {
+// Function to create or get a wallet from the given wallet path
+func CreateWallet(walletPath string) *gateway.Wallet {
 	walletPath = filepath.Clean(walletPath)
 
 	// If wallet exist, the existing wallet will be returned instead
@@ -36,7 +38,8 @@ func createWallet(walletPath string) *gateway.Wallet {
 	return wallet
 }
 
-func newIdentityFromFile(mspid string, certpath string, keypath string) *gateway.X509Identity {
+// Create a new X509Identity from associated mspid, issued certificate file and private key file
+func NewIdentityFromFile(mspid string, certpath string, keypath string) *gateway.X509Identity {
 	certbytes, err := os.ReadFile(filepath.Clean(certpath))
 
 	checkError(err)
@@ -48,13 +51,15 @@ func newIdentityFromFile(mspid string, certpath string, keypath string) *gateway
 	return gateway.NewX509Identity(mspid, string(certbytes), string(keybytes))
 }
 
-func parseEnv(cfg *Config) {
+// Parse environment variables into a Config struct
+func ParseEnv(cfg *Config) {
 	err := envconfig.Process("", cfg)
 	checkError(err)
 }
 
-func getGateway(identityLabel string, cfg *Config) *gateway.Gateway {
-	wallet := createWallet(cfg.Identity.WalletPath)
+// Return a gateway connected using the given identity
+func GetGateway(identityLabel string, cfg *Config) *gateway.Gateway {
+	wallet := CreateWallet(cfg.Identity.WalletPath)
 
 	if !wallet.Exists(identityLabel) {
 		log.Panicf("Identity %s not found in wallet %s!", identityLabel, cfg.Identity.WalletPath)
@@ -72,13 +77,15 @@ func getGateway(identityLabel string, cfg *Config) *gateway.Gateway {
 	return gw
 }
 
-func getNetwork(gw gateway.Gateway, channelName string) *gateway.Network {
+// Get a channel instance from a connected gateway using channel name
+func GetNetwork(gw gateway.Gateway, channelName string) *gateway.Network {
 	network, err := gw.GetNetwork(channelName)
 	checkError(err)
 	return network
 }
 
-func getContract(network gateway.Network, chaincodeName string, contractName string) *gateway.Contract {
+// Get a contract instance from a connected channel using chaincode name and contract name
+func GetContract(network gateway.Network, chaincodeName string, contractName string) *gateway.Contract {
 	contract := network.GetContractWithName(chaincodeName, contractName)
 	return contract
 }
