@@ -52,25 +52,25 @@ func TestConfigParser(t *testing.T) {
 	var cfg Config
 	ParseEnv(&cfg)
 
-	if len(cfg.Identity.MspID) == 0 {
-		t.Fatalf("MSPID is empty!")
+	expectedMspID := "Org1MSP"
+	expectedLabel := "User1"
+	expectedCertPath := "../../test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/cert.pem"
+	expectedKeystorePath := "../../test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore"
+	expectedWalletPath := "./wallet/test"
+	expectedCCPPath := "../../test-network/organizations/peerOrganizations/org1.example.com/connection-org1.json"
+
+	var checkMatches = func(name string, expected any, got any) {
+		if got != expected {
+			t.Fatalf("%s does not match the expected value: (expected: %s, got: %s)", name, expected, got)
+		}
 	}
 
-	if len(cfg.Identity.CertPath) == 0 {
-		t.Fatalf("CertPath is empty!")
-	}
-
-	if len(cfg.Identity.KeystorePath) == 0 {
-		t.Fatalf("KeystorePath is empty!")
-	}
-
-	if len(cfg.Identity.WalletPath) == 0 {
-		t.Fatalf("WalletPath is empty!")
-	}
-
-	if len(cfg.Identity.CCPPath) == 0 {
-		t.Fatalf("CCPPath is empty!")
-	}
+	checkMatches("MspID", cfg.MspID, expectedMspID)
+	checkMatches("Label", cfg.Label, expectedLabel)
+	checkMatches("CertPath", cfg.CertPath, expectedCertPath)
+	checkMatches("KeystorePath", cfg.KeystorePath, expectedKeystorePath)
+	checkMatches("WalletPath", cfg.WalletPath, expectedWalletPath)
+	checkMatches("CCPPath", cfg.CCPPath, expectedCCPPath)
 }
 
 func TestPutIdentity(t *testing.T) {
@@ -84,19 +84,19 @@ func TestPutIdentity(t *testing.T) {
 	var cfg Config
 	ParseEnv(&cfg)
 
-	wallet := CreateWallet(cfg.Identity.WalletPath)
+	wallet := CreateWallet(cfg.WalletPath)
 
 	if wallet == nil {
-		t.Fatalf("Failed to create wallet at %s", cfg.Identity.WalletPath)
+		t.Fatalf("Failed to create wallet at %s", cfg.WalletPath)
 	}
 
-	files, err := os.ReadDir(cfg.Identity.KeystorePath)
+	files, err := os.ReadDir(cfg.KeystorePath)
 
 	if err != nil {
-		t.Fatalf("Error reading from %s\nErr: %s", cfg.Identity.KeystorePath, err)
+		t.Fatalf("Error reading from %s\nErr: %s", cfg.KeystorePath, err)
 	}
 
-	keyStorePath := cfg.Identity.KeystorePath + files[0].Name()
+	keyStorePath := cfg.KeystorePath + files[0].Name()
 
 	identity := NewIdentityFromFile(MSP_ID, CERT_PATH, keyStorePath)
 
@@ -104,18 +104,16 @@ func TestPutIdentity(t *testing.T) {
 		t.Fatalf("Identity failed to be created from cert path: %s\n keystore path: %s", CERT_PATH, keyStorePath)
 	}
 
-	label := "User1@org1"
-
-	id, err := wallet.Get(label)
+	id, err := wallet.Get(cfg.Label)
 
 	if id != nil {
-		t.Fatalf("Identity %s already exists in wallet!", label)
+		t.Fatalf("Identity %s already exists in wallet!", cfg.Label)
 	}
 
-	err = wallet.Put(label, identity)
+	err = wallet.Put(cfg.Label, identity)
 
 	if err != nil {
-		t.Fatalf("Fail to put identity %s to wallet!", label)
+		t.Fatalf("Fail to put identity %s to wallet!", cfg.Label)
 	}
 
 	t.Cleanup(func() { os.RemoveAll(WALLET_PATH) })
