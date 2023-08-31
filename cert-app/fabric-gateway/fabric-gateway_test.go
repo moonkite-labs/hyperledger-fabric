@@ -104,7 +104,7 @@ func TestPutIdentity(t *testing.T) {
 		t.Fatalf("Identity failed to be created from cert path: %s\n keystore path: %s", CERT_PATH, keyStorePath)
 	}
 
-	id, err := wallet.Get(cfg.Label)
+	id, _ := wallet.Get(cfg.Label)
 
 	if id != nil {
 		t.Fatalf("Identity %s already exists in wallet!", cfg.Label)

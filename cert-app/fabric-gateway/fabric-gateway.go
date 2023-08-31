@@ -22,20 +22,13 @@ type Config struct {
 	Label        string `envconfig:"LABEL"`
 }
 
-// Stops execution if an error is found
-func checkError(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
 // Function to create or get a wallet from the given wallet path
 func CreateWallet(walletPath string) *gateway.Wallet {
 	walletPath = filepath.Clean(walletPath)
 
 	// If wallet exist, the existing wallet will be returned instead
 	wallet, err := gateway.NewFileSystemWallet(walletPath)
-	checkError(err)
+	CheckError(err)
 
 	return wallet
 }
@@ -44,11 +37,11 @@ func CreateWallet(walletPath string) *gateway.Wallet {
 func NewIdentityFromFile(mspid string, certpath string, keypath string) *gateway.X509Identity {
 	certbytes, err := os.ReadFile(filepath.Clean(certpath))
 
-	checkError(err)
+	CheckError(err)
 
 	keybytes, err := os.ReadFile(filepath.Clean(certpath))
 
-	checkError(err)
+	CheckError(err)
 
 	return gateway.NewX509Identity(mspid, string(certbytes), string(keybytes))
 }
@@ -56,7 +49,7 @@ func NewIdentityFromFile(mspid string, certpath string, keypath string) *gateway
 // Parse environment variables into a Config struct
 func ParseEnv(cfg *Config) {
 	err := envconfig.Process("", cfg)
-	checkError(err)
+	CheckError(err)
 }
 
 // Return a gateway connected using the given identity
@@ -74,7 +67,7 @@ func GetGateway(cfg Config) *gateway.Gateway {
 		gateway.WithIdentity(wallet, cfg.Label),
 	)
 
-	checkError(err)
+	CheckError(err)
 
 	return gw
 }
@@ -82,7 +75,7 @@ func GetGateway(cfg Config) *gateway.Gateway {
 // Get a channel instance from a connected gateway using channel name
 func GetNetwork(gw gateway.Gateway, channelName string) *gateway.Network {
 	network, err := gw.GetNetwork(channelName)
-	checkError(err)
+	CheckError(err)
 	return network
 }
 
@@ -141,14 +134,14 @@ func main() {
 	if *isNew {
 		wallet := CreateWallet(walletPath)
 		file, err := os.Lstat(keystorePath)
-		checkError(err)
+		CheckError(err)
 
 		// If the given path is a directory, take the first file
 		// (The generated filename is random each time, so giving the directory is easier for testing)
 		if file.IsDir() {
 			files, err := os.ReadDir(cfg.KeystorePath)
 
-			checkError(err)
+			CheckError(err)
 
 			keystorePath = cfg.KeystorePath + files[0].Name()
 		}
