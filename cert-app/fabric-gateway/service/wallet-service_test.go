@@ -38,13 +38,14 @@ func TestPutIdentity(t *testing.T) {
 	}
 
 	label := "user1"
+	mspid := "Org1MSP"
 	eCert, privKey, err := getKeys(PK_PATH, SK_PATH)
 	if err != nil {
 		t.Error(err)
 		t.Fatal("Fail to retrieve keys")
 	}
 
-	err = p.Put(label, eCert, privKey)
+	err = p.Put(label, mspid, eCert, privKey)
 	if err != nil {
 		t.Error(err)
 		t.Fatal("Fail to put identity into wallet")
@@ -60,6 +61,7 @@ func TestGetIdentity(t *testing.T) {
 	}
 
 	label := "user1"
+	expectedMSPID := "Org1MSP"
 	expectedECert, expectedPrivKey, err := getKeys(PK_PATH, SK_PATH)
 	if err != nil {
 		t.Error(err)
@@ -70,6 +72,10 @@ func TestGetIdentity(t *testing.T) {
 
 	if label != i.Label {
 		t.Fatalf("Label does not match!\nExpected: %s\nReceived: %s", label, i.Label)
+	}
+
+	if expectedMSPID != i.MSPID {
+		t.Fatalf("MSPID does not match!\nExpected: %s\nReceived: %s", expectedMSPID, i.MSPID)
 	}
 
 	if !bytes.Equal(expectedECert, i.PublicKey) {
