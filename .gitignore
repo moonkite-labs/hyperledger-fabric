@@ -4,3 +4,12 @@ builders/
 
 # Wallet
 wallet/
+
+# Key files
+*.pem
+*.crt
+peerOrganizations/*
+ordererOrganizations/*
+**/msp/*
+**/tls*ca/*
+*.key
