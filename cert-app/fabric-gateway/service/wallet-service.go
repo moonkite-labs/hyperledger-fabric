@@ -36,20 +36,22 @@ func (p *PostgreWalletService) Connect(host string, user string, password string
 	return nil
 }
 
-//	 Put an identity into the wallet.
+//		Put an identity into the wallet.
 //
 //		Parameters:
-//		label specifies the name of the identity in the wallet.
-//		publicKey the public key of the identity in bytes form.
-//	 privateKey the private key of the identity in bytes form.
+//		  label specifies the name of the identity in the wallet.
+//	   mspid the associated mspid of the identity
+//		  publicKey the public key of the identity in bytes form.
+//	   privateKey the private key of the identity in bytes form.
 //
 //		Returns:
-//		Error if any
-func (p *PostgreWalletService) Put(label string, publicKey []byte, privateKey []byte) error {
+//		  Error if any
+func (p *PostgreWalletService) Put(label string, mspid string, publicKey []byte, privateKey []byte) error {
 	var err error
 
 	i := models.Identity{
 		Label:      label,
+		MSPID:      mspid,
 		PublicKey:  publicKey,
 		PrivateKey: privateKey,
 	}
@@ -84,16 +86,17 @@ func (p *PostgreWalletService) Get(label string) *models.Identity {
 	return &i
 }
 
-//	 Update an identity in the wallet.
+//		 Update an identity in the wallet.
 //
-//		Parameters:
-//		label specifies the name of the identity in the wallet.
-//		publicKey the public key of the identity in bytes form.
-//	 privateKey the private key of the identity in bytes form.
+//			Parameters:
+//			label specifies the name of the identity in the wallet.
+//	     mspid the associated mspid of the identity
+//			publicKey the public key of the identity in bytes form.
+//		    privateKey the private key of the identity in bytes form.
 //
-//		Returns:
-//		Error if any
-func (p *PostgreWalletService) Update(label string, publicKey []byte, privateKey []byte) error {
+//			Returns:
+//			Error if any
+func (p *PostgreWalletService) Update(label string, mspid string, publicKey []byte, privateKey []byte) error {
 	var err error
 
 	if !p.Exists(label) {
@@ -101,6 +104,10 @@ func (p *PostgreWalletService) Update(label string, publicKey []byte, privateKey
 	}
 
 	i := p.Get(label)
+
+	if mspid != "" {
+		i.MSPID = mspid
+	}
 
 	if publicKey != nil {
 		i.PublicKey = publicKey
