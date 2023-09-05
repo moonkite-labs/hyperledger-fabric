@@ -6,10 +6,10 @@ builders/
 wallet/
 
 # Key files
-*.pem
 *.crt
 test-network/organizations/fabric-ca/tls-ca/*
 test-network/organizations/fabric-ca/msp/*
+test-network/temporg/*
 peerOrganizations/*
 ordererOrganizations/*
 *.key
