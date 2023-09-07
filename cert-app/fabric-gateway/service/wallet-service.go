@@ -10,9 +10,9 @@ import (
 )
 
 type WalletService interface {
-	Put(label string, publicKey []byte, privateKey []byte) error
-	Get(label string) models.Identity
-	Update(label string) error
+	Put(label string, mspid string, publicKey []byte, privateKey []byte) error
+	Get(label string) (*models.Identity, error)
+	Update(label string, mspid string, publicKey []byte, privateKey []byte) error
 	Delete(label string) error
 }
 
@@ -46,7 +46,7 @@ func (p *PostgreWalletService) Connect(host string, user string, password string
 //
 //		Returns:
 //		  Error if any
-func (p *PostgreWalletService) Put(label string, mspid string, publicKey []byte, privateKey []byte) error {
+func (p PostgreWalletService) Put(label string, mspid string, publicKey []byte, privateKey []byte) error {
 	var err error
 
 	i := models.Identity{
@@ -71,7 +71,7 @@ func (p *PostgreWalletService) Put(label string, mspid string, publicKey []byte,
 //
 //		Returns:
 //		The identity object.
-func (p *PostgreWalletService) Get(label string) *models.Identity {
+func (p PostgreWalletService) Get(label string) (*models.Identity, error) {
 	var err error
 
 	i := models.Identity{}
@@ -80,10 +80,10 @@ func (p *PostgreWalletService) Get(label string) *models.Identity {
 
 	if err != nil {
 		errors.Wrap(err, fmt.Sprintf("Error finding identity with label %s", label))
-		return nil
+		return nil, err
 	}
 
-	return &i
+	return &i, nil
 }
 
 //		 Update an identity in the wallet.
@@ -96,14 +96,18 @@ func (p *PostgreWalletService) Get(label string) *models.Identity {
 //
 //			Returns:
 //			Error if any
-func (p *PostgreWalletService) Update(label string, mspid string, publicKey []byte, privateKey []byte) error {
+func (p PostgreWalletService) Update(label string, mspid string, publicKey []byte, privateKey []byte) error {
 	var err error
 
 	if !p.Exists(label) {
 		return errors.New(fmt.Sprintf("Identity with label %s does not exist!", label))
 	}
 
-	i := p.Get(label)
+	i, err := p.Get(label)
+
+	if err != nil {
+		return errors.Wrapf(err, "Failed to get label %s", label)
+	}
 
 	if mspid != "" {
 		i.MSPID = mspid
@@ -129,7 +133,7 @@ func (p *PostgreWalletService) Update(label string, mspid string, publicKey []by
 //
 //		Returns:
 //		True or false.
-func (p *PostgreWalletService) Exists(label string) bool {
+func (p PostgreWalletService) Exists(label string) bool {
 
 	i := models.Identity{}
 
@@ -149,7 +153,7 @@ func (p *PostgreWalletService) Exists(label string) bool {
 //
 //		Returns:
 //		The identity object.
-func (p *PostgreWalletService) Delete(label string) error {
+func (p PostgreWalletService) Delete(label string) error {
 	var err error
 
 	i := models.Identity{}

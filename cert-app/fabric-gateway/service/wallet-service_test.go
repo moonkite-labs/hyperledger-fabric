@@ -8,12 +8,7 @@ import (
 )
 
 const (
-	HOSTNAME            = "localhost"
-	PORT                = "5432"
-	USER                = "postgres"
-	PASSWORD            = "postgres"
-	DBNAME              = "postgres"
-	TEST_DATA_ROOT_PATH = "./test_data"
+	TEST_DATA_ROOT_PATH = "../test_data"
 )
 
 var (
@@ -22,16 +17,27 @@ var (
 )
 
 func TestPostgreConnection(t *testing.T) {
-	p := PostgreWalletService{}
-	err := p.Connect(HOSTNAME, USER, PASSWORD, DBNAME, PORT)
+	cfg, err := SetupEnv(ENV_FILE)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	p := PostgreWalletService{}
+	err = p.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+	if err != nil {
+		t.Error(err)
+		t.Fatal("Fail to connect to the database")
 	}
 }
 
 func TestPutIdentity(t *testing.T) {
+	cfg, err := SetupEnv(ENV_FILE)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	p := PostgreWalletService{}
-	err := p.Connect(HOSTNAME, USER, PASSWORD, DBNAME, PORT)
+	err = p.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
 	if err != nil {
 		t.Error(err)
 		t.Fatal("Fail to connect to the database")
@@ -53,8 +59,13 @@ func TestPutIdentity(t *testing.T) {
 }
 
 func TestGetIdentity(t *testing.T) {
+	cfg, err := SetupEnv(ENV_FILE)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	p := PostgreWalletService{}
-	err := p.Connect(HOSTNAME, USER, PASSWORD, DBNAME, PORT)
+	err = p.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
 	if err != nil {
 		t.Error(err)
 		t.Fatal("Fail to connect to the database")
@@ -68,7 +79,12 @@ func TestGetIdentity(t *testing.T) {
 		t.Fatal("Fail to retrieve keys")
 	}
 
-	i := p.Get(label)
+	i, err := p.Get(label)
+
+	if err != nil {
+		t.Error(err)
+		t.Fatal("Fail to get users")
+	}
 
 	if label != i.Label {
 		t.Fatalf("Label does not match!\nExpected: %s\nReceived: %s", label, i.Label)

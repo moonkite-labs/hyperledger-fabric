@@ -1,70 +1,79 @@
 package main
 
 import (
+	"crypto/x509"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"flag"
 
-	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
-	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
-	"github.com/kelseyhightower/envconfig"
+	wallet "fabric-gateway/service"
+
+	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-gateway/pkg/identity"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+
+	"fabric-gateway/config"
 )
 
-type Config struct {
-	MspID        string `envconfig:"MSP_ID"`
-	CertPath     string `envconfig:"CERT_PATH"`
-	KeystorePath string `envconfig:"KEYSTORE_PATH"`
-	WalletPath   string `envconfig:"WALLET_PATH"`
-	CCPPath      string `envconfig:"CCP_PATH"`
-	Label        string `envconfig:"LABEL"`
-}
-
-// Function to create or get a wallet from the given wallet path
-func CreateWallet(walletPath string) *gateway.Wallet {
-	walletPath = filepath.Clean(walletPath)
-
-	// If wallet exist, the existing wallet will be returned instead
-	wallet, err := gateway.NewFileSystemWallet(walletPath)
-	CheckError(err)
-
-	return wallet
-}
-
 // Create a new X509Identity from associated mspid, issued certificate file and private key file
-func NewIdentityFromFile(mspid string, certpath string, keypath string) *gateway.X509Identity {
-	certbytes, err := os.ReadFile(filepath.Clean(certpath))
+func NewIdentityFromFile(mspid string, certpath string) (*identity.X509Identity, error) {
+
+	cert, err := loadCertificate(certpath)
 
 	CheckError(err)
 
-	keybytes, err := os.ReadFile(filepath.Clean(certpath))
-
-	CheckError(err)
-
-	return gateway.NewX509Identity(mspid, string(certbytes), string(keybytes))
-}
-
-// Parse environment variables into a Config struct
-func ParseEnv(cfg *Config) {
-	err := envconfig.Process("", cfg)
-	CheckError(err)
+	return identity.NewX509Identity(mspid, cert)
 }
 
 // Return a gateway connected using the given identity
-func GetGateway(cfg Config) *gateway.Gateway {
-	wallet := CreateWallet(cfg.WalletPath)
+func GetGateway(cfg config.Config) *client.Gateway {
+	wallet := wallet.PostgreWalletService{}
+	err := wallet.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
 
-	if !wallet.Exists(cfg.Label) {
-		log.Panicf("Identity %s not found in wallet %s!", cfg.Label, cfg.WalletPath)
+	if err != nil {
+		log.Panic(err.Error())
 	}
 
-	ccp := config.FromFile(cfg.CCPPath)
+	if !wallet.Exists(cfg.Label) {
+		log.Panicf("Identity %s not found in wallet!", cfg.Label)
+	}
 
-	gw, err := gateway.Connect(
-		gateway.WithConfig(ccp),
-		gateway.WithIdentity(wallet, cfg.Label),
+	clientConnection := newGrpcConnection(cfg)
+	// Remember to close connection after use!
+
+	id, err := wallet.Get(cfg.Label)
+
+	if err != nil {
+		log.Panic(err.Error())
+	}
+
+	x509id, err := id.ToX509Identity()
+
+	if err != nil {
+		log.Panic(err.Error())
+	}
+
+	sign, err := id.ToSign()
+
+	if err != nil {
+		log.Panic(err.Error())
+	}
+
+	// Create a Gateway connection for a specific client identity
+	gw, err := client.Connect(
+		x509id,
+		client.WithSign(sign),
+		client.WithClientConnection(clientConnection),
+		// Default timeouts for different gRPC calls
+		client.WithEvaluateTimeout(5*time.Second),
+		client.WithEndorseTimeout(15*time.Second),
+		client.WithSubmitTimeout(5*time.Second),
+		client.WithCommitStatusTimeout(1*time.Minute),
 	)
 
 	CheckError(err)
@@ -72,15 +81,42 @@ func GetGateway(cfg Config) *gateway.Gateway {
 	return gw
 }
 
-// Get a channel instance from a connected gateway using channel name
-func GetNetwork(gw gateway.Gateway, channelName string) *gateway.Network {
-	network, err := gw.GetNetwork(channelName)
+func loadCertificate(path string) (*x509.Certificate, error) {
+	certbytes, err := os.ReadFile(filepath.Clean(path))
+
 	CheckError(err)
+
+	cert, err := identity.CertificateFromPEM(certbytes)
+
+	CheckError(err)
+
+	return cert, err
+}
+
+// newGrpcConnection creates a gRPC connection to the Gateway server.
+func newGrpcConnection(cfg config.Config) *grpc.ClientConn {
+	certificate, err := loadCertificate(cfg.CertPath)
+	CheckError(err)
+	certPool := x509.NewCertPool()
+	certPool.AddCert(certificate)
+	transportCredentials := credentials.NewClientTLSFromCert(certPool, cfg.GatewayPeer)
+
+	connection, err := grpc.Dial(cfg.PeerEndpoint, grpc.WithTransportCredentials(transportCredentials))
+	if err != nil {
+		panic(fmt.Errorf("failed to create gRPC connection: %w", err))
+	}
+
+	return connection
+}
+
+// Get a channel instance from a connected gateway using channel name
+func GetNetwork(gw client.Gateway, channelName string) *client.Network {
+	network := gw.GetNetwork(channelName)
 	return network
 }
 
 // Get a contract instance from a connected channel using chaincode name and contract name
-func GetContract(network gateway.Network, chaincodeName string, contractName string) *gateway.Contract {
+func GetContract(network client.Network, chaincodeName string, contractName string) *client.Contract {
 	contract := network.GetContractWithName(chaincodeName, contractName)
 	return contract
 }
@@ -91,10 +127,9 @@ var Usage = func() {
 	flag.PrintDefaults()
 }
 
-func parseArgs(label *string, walletPath *string, ccpPath *string, mspid *string, certPath *string, keystorePath *string) {
+func parseArgs(label *string, ccpPath *string, mspid *string, certPath *string, keystorePath *string) {
 	flag.StringVar(mspid, "mspid", "", "The MSP ID managing the identity")
 	flag.StringVar(label, "label", "", "A unique name to store and get the identity from the wallet")
-	flag.StringVar(walletPath, "walletPath", "", "The path to create or get a wallet")
 	flag.StringVar(ccpPath, "ccpPath", "", "The path to the associated connection profile")
 	flag.StringVar(certPath, "certPath", "", "The path to the signed identity certificate issued by the CA and MSP")
 	flag.StringVar(keystorePath, "keystorePath", "", "The path to the identity's private key issued by the CA and MSP")
@@ -102,12 +137,12 @@ func parseArgs(label *string, walletPath *string, ccpPath *string, mspid *string
 
 func main() {
 	// Some required
-	var label, walletPath, ccpPath, mspid, certPath, keystorePath string
+	var label, ccpPath, mspid, certPath, keystorePath string
 	var isEnv = flag.Bool("env", true, "Use environment variables to get the required values")
 	var isNew = flag.Bool("new", false, "Put the new identity into the wallet by label, this argument will not be parsed from env vars")
 	var isHelp = flag.Bool("h", false, "Print help message")
 
-	parseArgs(&label, &walletPath, &ccpPath, &mspid, &certPath, &keystorePath)
+	parseArgs(&label, &ccpPath, &mspid, &certPath, &keystorePath)
 
 	flag.Parse()
 
@@ -116,23 +151,21 @@ func main() {
 		os.Exit(0)
 	}
 
-	var cfg Config
+	var cfg config.Config
 	if *isEnv {
-		ParseEnv(&cfg)
+		cfg.ParseEnv()
 	} else {
 
-		cfg = Config{
+		cfg = config.Config{
 			MspID:        mspid,
 			CertPath:     certPath,
 			KeystorePath: keystorePath,
-			WalletPath:   walletPath,
 			CCPPath:      ccpPath,
 			Label:        label,
 		}
 	}
 
 	if *isNew {
-		wallet := CreateWallet(walletPath)
 		file, err := os.Lstat(keystorePath)
 		CheckError(err)
 
@@ -146,8 +179,7 @@ func main() {
 			keystorePath = cfg.KeystorePath + files[0].Name()
 		}
 
-		identity := NewIdentityFromFile(mspid, certPath, keystorePath)
-		wallet.Put(label, identity)
+		_, err = NewIdentityFromFile(mspid, certPath)
 	}
 
 	gw := GetGateway(cfg)

@@ -75,6 +75,7 @@ github.com/hyperledger/fabric-protos-go v0.0.0-20200424173316-dd554ba3746e/go.mo
 github.com/hyperledger/fabric-protos-go v0.0.0-20200707132912-fee30f3ccd23 h1:SEbB3yH4ISTGRifDamYXAst36gO2kM855ndMJlsv+pc=
 github.com/hyperledger/fabric-protos-go v0.0.0-20200707132912-fee30f3ccd23/go.mod h1:xVYTjK4DtZRBxZ2D9aE4y6AbLaPwue2o/criQyQbVD0=
 github.com/hyperledger/fabric-protos-go-apiv2 v0.2.0 h1:+J5f5uPzlgyfyeQ0nnqmuFYQvARGYG8SnZ8xODXlAsI=
+github.com/hyperledger/fabric-protos-go-apiv2 v0.2.0/go.mod h1:smwq1q6eKByqQAp0SYdVvE1MvDoneF373j11XwWajgA=
 github.com/hyperledger/fabric-sdk-go v1.0.1-0.20210201220314-86344dc25e5d h1:wBo9/jF7rOYrb/xrs99snFoPLxSpkPY2BSaPk/iZwI4=
 github.com/hyperledger/fabric-sdk-go v1.0.1-0.20210201220314-86344dc25e5d/go.mod h1:qWE9Syfg1KbwNjtILk70bJLilnmCvllIYFCSY/pa1RU=
 github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=

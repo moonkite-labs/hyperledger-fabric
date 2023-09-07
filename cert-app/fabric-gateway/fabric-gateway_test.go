@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fabric-gateway/config"
 	"os"
 	"path/filepath"
 	"testing"
@@ -14,16 +15,6 @@ var CRYPTO_PATH = filepath.Clean("../../test-network/organizations/peerOrganizat
 var CERT_PATH = filepath.Join(CRYPTO_PATH, "org1.example.com/users/User1@org1.example.com/msp/signcerts/cert.pem")
 var KEYSTORE_DIR_PATH = filepath.Join(CRYPTO_PATH, "org1.example.com/users/User1@org1.example.com/msp/keystore")
 
-// Test wallet creation at the specified path
-func TestCreateWallet(t *testing.T) {
-	wallet := CreateWallet(WALLET_PATH)
-	if wallet == nil {
-		t.Fatalf("Failed to create wallet at path %s", WALLET_PATH)
-	}
-	// Clean up
-	t.Cleanup(func() { os.Remove(WALLET_PATH) })
-}
-
 // Test identity creation from file, using mspid Org1MSP
 func TestCreateIdentity(t *testing.T) {
 
@@ -35,7 +26,7 @@ func TestCreateIdentity(t *testing.T) {
 
 	keyStorePath := KEYSTORE_DIR_PATH + files[0].Name()
 
-	identity := NewIdentityFromFile(MSP_ID, CERT_PATH, keyStorePath)
+	identity, err := NewIdentityFromFile(MSP_ID, CERT_PATH)
 
 	if identity == nil {
 		t.Fatalf("Identity failed to be created from cert path: %s\n keystore path: %s", CERT_PATH, keyStorePath)
@@ -49,15 +40,14 @@ func TestConfigParser(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	var cfg Config
-	ParseEnv(&cfg)
+	var cfg config.Config
+	cfg.ParseEnv()
 
 	expectedMspID := "Org1MSP"
 	expectedLabel := "User1"
 	expectedCertPath := "../../test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/cert.pem"
 	expectedKeystorePath := "../../test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore"
-	expectedWalletPath := "./wallet/test"
-	expectedCCPPath := "../../test-network/organizations/peerOrganizations/org1.example.com/connection-org1.json"
+	expectedCCPPath := "./client-config/config.yaml"
 
 	var checkMatches = func(name string, expected any, got any) {
 		if got != expected {
@@ -69,52 +59,5 @@ func TestConfigParser(t *testing.T) {
 	checkMatches("Label", cfg.Label, expectedLabel)
 	checkMatches("CertPath", cfg.CertPath, expectedCertPath)
 	checkMatches("KeystorePath", cfg.KeystorePath, expectedKeystorePath)
-	checkMatches("WalletPath", cfg.WalletPath, expectedWalletPath)
 	checkMatches("CCPPath", cfg.CCPPath, expectedCCPPath)
-}
-
-func TestPutIdentity(t *testing.T) {
-
-	err := godotenv.Load(".env.test")
-
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-
-	var cfg Config
-	ParseEnv(&cfg)
-
-	wallet := CreateWallet(cfg.WalletPath)
-
-	if wallet == nil {
-		t.Fatalf("Failed to create wallet at %s", cfg.WalletPath)
-	}
-
-	files, err := os.ReadDir(cfg.KeystorePath)
-
-	if err != nil {
-		t.Fatalf("Error reading from %s\nErr: %s", cfg.KeystorePath, err)
-	}
-
-	keyStorePath := cfg.KeystorePath + files[0].Name()
-
-	identity := NewIdentityFromFile(MSP_ID, CERT_PATH, keyStorePath)
-
-	if identity == nil {
-		t.Fatalf("Identity failed to be created from cert path: %s\n keystore path: %s", CERT_PATH, keyStorePath)
-	}
-
-	id, _ := wallet.Get(cfg.Label)
-
-	if id != nil {
-		t.Fatalf("Identity %s already exists in wallet!", cfg.Label)
-	}
-
-	err = wallet.Put(cfg.Label, identity)
-
-	if err != nil {
-		t.Fatalf("Fail to put identity %s to wallet!", cfg.Label)
-	}
-
-	t.Cleanup(func() { os.RemoveAll(WALLET_PATH) })
 }
