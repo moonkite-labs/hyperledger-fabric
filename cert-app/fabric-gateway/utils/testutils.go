@@ -1,4 +1,4 @@
-package service
+package utils
 
 import (
 	"fabric-gateway/config"

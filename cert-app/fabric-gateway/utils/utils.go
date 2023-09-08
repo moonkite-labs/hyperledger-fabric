@@ -1,4 +1,4 @@
-package main
+package utils
 
 // Stops execution if an error is found
 func CheckError(err error) {
