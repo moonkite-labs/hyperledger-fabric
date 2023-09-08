@@ -2,6 +2,7 @@ package main
 
 import (
 	"fabric-gateway/config"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -60,4 +61,22 @@ func TestConfigParser(t *testing.T) {
 	checkMatches("CertPath", cfg.CertPath, expectedCertPath)
 	checkMatches("KeystorePath", cfg.KeystorePath, expectedKeystorePath)
 	checkMatches("CCPPath", cfg.CCPPath, expectedCCPPath)
+}
+
+func TestGetIdentity(t *testing.T) {
+	err := godotenv.Load(".env.test")
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	var cfg config.Config
+	cfg.ParseEnv()
+
+	x509cert, err := LoadCertificate(cfg.CertPath)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	fmt.Printf("%+v\n", x509cert)
 }

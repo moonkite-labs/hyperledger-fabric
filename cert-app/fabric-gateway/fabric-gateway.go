@@ -10,7 +10,7 @@ import (
 
 	"flag"
 
-	wallet "fabric-gateway/service"
+	db "fabric-gateway/service/db"
 
 	"github.com/hyperledger/fabric-gateway/pkg/client"
 	"github.com/hyperledger/fabric-gateway/pkg/identity"
@@ -18,21 +18,22 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	"fabric-gateway/config"
+	"fabric-gateway/utils"
 )
 
 // Create a new X509Identity from associated mspid, issued certificate file and private key file
 func NewIdentityFromFile(mspid string, certpath string) (*identity.X509Identity, error) {
 
-	cert, err := loadCertificate(certpath)
+	cert, err := LoadCertificate(certpath)
 
-	CheckError(err)
+	utils.CheckError(err)
 
 	return identity.NewX509Identity(mspid, cert)
 }
 
 // Return a gateway connected using the given identity
 func GetGateway(cfg config.Config) *client.Gateway {
-	wallet := wallet.PostgreWalletService{}
+	wallet := db.PostgreWalletService{}
 	err := wallet.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
 
 	if err != nil {
@@ -76,27 +77,27 @@ func GetGateway(cfg config.Config) *client.Gateway {
 		client.WithCommitStatusTimeout(1*time.Minute),
 	)
 
-	CheckError(err)
+	utils.CheckError(err)
 
 	return gw
 }
 
-func loadCertificate(path string) (*x509.Certificate, error) {
+func LoadCertificate(path string) (*x509.Certificate, error) {
 	certbytes, err := os.ReadFile(filepath.Clean(path))
 
-	CheckError(err)
+	utils.CheckError(err)
 
 	cert, err := identity.CertificateFromPEM(certbytes)
 
-	CheckError(err)
+	utils.CheckError(err)
 
 	return cert, err
 }
 
 // newGrpcConnection creates a gRPC connection to the Gateway server.
 func newGrpcConnection(cfg config.Config) *grpc.ClientConn {
-	certificate, err := loadCertificate(cfg.CertPath)
-	CheckError(err)
+	certificate, err := LoadCertificate(cfg.CertPath)
+	utils.CheckError(err)
 	certPool := x509.NewCertPool()
 	certPool.AddCert(certificate)
 	transportCredentials := credentials.NewClientTLSFromCert(certPool, cfg.GatewayPeer)
@@ -167,14 +168,14 @@ func main() {
 
 	if *isNew {
 		file, err := os.Lstat(keystorePath)
-		CheckError(err)
+		utils.CheckError(err)
 
 		// If the given path is a directory, take the first file
 		// (The generated filename is random each time, so giving the directory is easier for testing)
 		if file.IsDir() {
 			files, err := os.ReadDir(cfg.KeystorePath)
 
-			CheckError(err)
+			utils.CheckError(err)
 
 			keystorePath = cfg.KeystorePath + files[0].Name()
 		}
