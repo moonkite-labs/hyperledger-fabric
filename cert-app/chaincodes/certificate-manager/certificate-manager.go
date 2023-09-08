@@ -14,7 +14,7 @@ func main() {
 		log.Panicf("Error creating certificate-manager chaincode: %v", err)
 	}
 
-	if err := assetChaincode.Start(); err != nil {
+	if err := contractChaincode.Start(); err != nil {
 		log.Panicf("Error starting certificate-manager chaincode: %v", err)
 	}
 }
