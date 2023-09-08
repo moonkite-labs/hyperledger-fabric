@@ -3,15 +3,17 @@ package service
 import (
 	"fmt"
 
+	"fabric-gateway/service/db"
+
 	mspctx "github.com/hyperledger/fabric-sdk-go/pkg/common/providers/msp"
 )
 
 // Manages storage of a user's cryptographic identity
 type IdentityService struct {
-	wallet WalletService
+	wallet db.PostgreWalletService
 }
 
-func NewIdentityService(wallet WalletService) *IdentityService {
+func NewIdentityService(wallet db.PostgreWalletService) *IdentityService {
 	return &IdentityService{wallet: wallet}
 }
 

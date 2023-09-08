@@ -1,16 +1,18 @@
 package service
 
 import (
+	"fabric-gateway/service/db"
+	"fabric-gateway/utils"
 	"testing"
 )
 
 func TestCreateNewIdentityService(t *testing.T) {
-	cfg, err := SetupEnv(ENV_FILE)
+	cfg, err := utils.SetupEnv(utils.ENV_FILE)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	p := PostgreWalletService{}
+	p := db.PostgreWalletService{}
 	err = p.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
 	if err != nil {
 		t.Fatal(err)
@@ -20,12 +22,12 @@ func TestCreateNewIdentityService(t *testing.T) {
 }
 
 func TestSaveNewIdentityFromExistingKeys(t *testing.T) {
-	cfg, err := SetupEnv(ENV_FILE)
+	cfg, err := utils.SetupEnv(utils.ENV_FILE)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	p := PostgreWalletService{}
+	p := db.PostgreWalletService{}
 	err = p.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
 	if err != nil {
 		t.Fatal(err)

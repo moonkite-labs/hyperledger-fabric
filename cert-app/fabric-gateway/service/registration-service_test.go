@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"fabric-gateway/utils"
+
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 )
@@ -23,7 +25,7 @@ func TestCreateFabSDK(t *testing.T) {
 }
 
 func TestCreateRegistrationService(t *testing.T) {
-	cfg, err := SetupEnv(ENV_FILE)
+	cfg, err := utils.SetupEnv(utils.ENV_FILE)
 
 	if err != nil {
 		t.Fatal("Failed to setup environment")
@@ -33,7 +35,7 @@ func TestCreateRegistrationService(t *testing.T) {
 }
 
 func TestEnrollAndRegister(t *testing.T) {
-	cfg, err := SetupEnv(ENV_FILE)
+	cfg, err := utils.SetupEnv(utils.ENV_FILE)
 
 	if err != nil {
 		t.Fatal("Failed to setup environment")
