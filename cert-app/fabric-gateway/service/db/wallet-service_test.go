@@ -1,14 +1,16 @@
-package service
+package db
 
 import (
 	"bytes"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"fabric-gateway/utils"
 )
 
 const (
-	TEST_DATA_ROOT_PATH = "../test_data"
+	TEST_DATA_ROOT_PATH = "../../test_data"
 )
 
 var (
@@ -17,7 +19,7 @@ var (
 )
 
 func TestPostgreConnection(t *testing.T) {
-	cfg, err := SetupEnv(ENV_FILE)
+	cfg, err := utils.SetupEnv(utils.ENV_FILE)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,7 +33,7 @@ func TestPostgreConnection(t *testing.T) {
 }
 
 func TestPutIdentity(t *testing.T) {
-	cfg, err := SetupEnv(ENV_FILE)
+	cfg, err := utils.SetupEnv(utils.ENV_FILE)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +61,7 @@ func TestPutIdentity(t *testing.T) {
 }
 
 func TestGetIdentity(t *testing.T) {
-	cfg, err := SetupEnv(ENV_FILE)
+	cfg, err := utils.SetupEnv(utils.ENV_FILE)
 	if err != nil {
 		t.Fatal(err)
 	}
