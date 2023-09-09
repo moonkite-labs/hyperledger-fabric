@@ -202,13 +202,13 @@ function createOrgs() {
 
     createOrg1
 
-    # infoln "Creating Org2 Identities"
+    infoln "Creating Org2 Identities"
 
-    # createOrg2
+    createOrg2
 
-    # infoln "Creating Orderer Org Identities"
+    infoln "Creating Orderer Org Identities"
 
-    # createOrderer
+    createOrderer
 
   fi
 
@@ -416,6 +416,13 @@ else
   shift
 fi
 
+if [[ "$MODE" == "createOrderer" ]]; then
+    . organizations/fabric-ca/registerEnroll.sh
+    infoln "Creating Orderer Org Identities"
+    createOrderer
+    exit 0
+fi
+
 # parse a createChannel subcommand if used
 if [[ $# -ge 1 ]] ; then
   key="$1"
@@ -423,6 +430,7 @@ if [[ $# -ge 1 ]] ; then
       export MODE="createChannel"
       shift
   fi
+
 fi
 
 # parse flags
