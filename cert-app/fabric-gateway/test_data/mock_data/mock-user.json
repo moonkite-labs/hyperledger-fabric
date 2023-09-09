@@ -1,0 +1,32 @@
+[
+    {
+        "OrgId": "6150d4b6-6477-49a7-bbb4-18118e07e416",
+        "CimPersonId": "c8303ccd-6138-4588-b7c9-d0db89028da1",
+        "CimOrganisationId": "3e249013-e879-4a65-bacd-17bc35780a07",
+        "Country": "Afghanistan",
+        "FirstName": "Carri",
+        "LastName": "Castella",
+        "PictureUrl": "http://yellowbook.com/sed/ante/vivamus.html",
+        "DateOfBirth": "1966-11-19T00:00:00+08:00",
+        "OrgName": "Org1",
+        "Wallet": {
+            "Label": "c8303ccd-6138-4588-b7c9-d0db89028da1",
+            "MSPID": "Org1MSP"
+        }
+    },
+    {
+        "OrgId": "6748bd7e-923c-4606-a262-faece7d89946",
+        "CimPersonId": "52ef8e0b-cef9-4045-8f58-9361b82ef576",
+        "CimOrganisationId": "4a7cc552-d93d-4229-8aac-a3a63108d1ff",
+        "Country": "Afghanistan",
+        "FirstName": "Sid",
+        "LastName": "Stubbes",
+        "PictureUrl": "https://msu.edu/orci/vehicula/condimentum/curabitur/in.xml",
+        "DateOfBirth": "1954-08-14T00:00:00+08:00",
+        "OrgName": "Org1",
+        "Wallet": {
+            "Label": "52ef8e0b-cef9-4045-8f58-9361b82ef576",
+            "MSPID": "Org1MSP"
+        }
+    }
+]

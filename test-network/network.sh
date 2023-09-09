@@ -202,13 +202,13 @@ function createOrgs() {
 
     createOrg1
 
-    infoln "Creating Org2 Identities"
+    # infoln "Creating Org2 Identities"
 
-    createOrg2
+    # createOrg2
 
-    infoln "Creating Orderer Org Identities"
+    # infoln "Creating Orderer Org Identities"
 
-    createOrderer
+    # createOrderer
 
   fi
 
