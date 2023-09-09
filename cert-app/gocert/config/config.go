@@ -9,8 +9,8 @@ type Config struct {
 	CCPPath      string `envconfig:"CCP_PATH"`
 	TlsCertPath  string `envconfig:"TLSCERT_PATH"`
 	Label        string `envconfig:"LABEL"`
-	GatewayPeer  string `envconfig:"GatewayPeer"`
-	PeerEndpoint string `envconfig:"PeerEndpoint"`
+	GatewayPeer  string `envconfig:"GATEWAY_PEER"`
+	PeerEndpoint string `envconfig:"PEER_ENDPOINT"`
 	DB_NAME      string `envconfig:"DB_NAME"`
 	DB_HOST      string `envconfig:"DB_HOST"`
 	DB_PORT      string `envconfig:"DB_PORT"`
