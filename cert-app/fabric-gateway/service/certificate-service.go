@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"gocert-gateway/db"
+	"gocert-gateway/gateway"
 	"gocert-gateway/models"
 	"gocert-gateway/utils"
 	"net/http"
@@ -17,10 +18,10 @@ type CertificateService struct {
 	baseDB          *db.BaseDBService
 	indiService     db.PostgreIndividualService
 	walletService   db.PostgreWalletService
-	contractService ContractService
+	contractService gateway.CertContractService
 }
 
-func NewCertificateService(baseDB *db.BaseDBService, indiService db.PostgreIndividualService, walletService db.PostgreWalletService, contractService ContractService) *CertificateService {
+func NewCertificateService(baseDB *db.BaseDBService, indiService db.PostgreIndividualService, walletService db.PostgreWalletService, contractService gateway.CertContractService) *CertificateService {
 	cs := &CertificateService{}
 	cs.baseDB = baseDB
 	cs.indiService = indiService
@@ -125,14 +126,12 @@ func (cs CertificateService) autoSignUpIssueCertificate(w http.ResponseWriter, r
 	// TODO CER-260 :  SEQ-#8.7
 }
 
-func (cs *CertificateService) IssueCertificate(requesterCimPersonId string, recipientCimPersonId string, issuerCert *models.Certificate, rCert *models.Certificate) error {
-	chaincodeName := "certificate-manager"
-	contractName := "CertificateContract"
+func (cs *CertificateService) IssueCertificate(requesterCimPersonId string, recipientCimPersonId string, issuerCert *models.Certificate, rCert *models.Certificate) (string, error) {
 
 	requester, err := cs.indiService.FindIndividualByCimPersonId(recipientCimPersonId)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	requesterCrypto := requester.Wallet
@@ -140,50 +139,48 @@ func (cs *CertificateService) IssueCertificate(requesterCimPersonId string, reci
 	signer, err := requesterCrypto.ToSign()
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	recipient, err := cs.indiService.FindIndividualByCimPersonId(recipientCimPersonId)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	recipientPublicKey := recipient.Wallet.PublicKey
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Serialise issuerCert, TODO: May need to change for a better encoder
 	issuerCertByte, err := json.Marshal(issuerCert)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Calculate issuerCertHash
 	issuerCertHash, err := utils.SHASumHex(issuerCertByte, 512)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Serialise issuerCert, TODO: May need to change for a better encoder
 	recipientCertByte, err := json.Marshal(rCert)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Calculate issuerCertHash
 	recipientCertHash, err := utils.SHASumHex(recipientCertByte, 512)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = cs.contractService.IssueCertificate(chaincodeName, contractName, requesterCimPersonId, signer, issuerCert.Id, issuerCertHash, recipientCertHash, recipientCimPersonId, recipientPublicKey, rCert.Id)
-
-	return err
+	return cs.contractService.IssueCertificate(requesterCimPersonId, signer, issuerCert.Id, issuerCertHash, recipientCertHash, recipientCimPersonId, recipientPublicKey, rCert.Id)
 }

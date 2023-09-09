@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"gocert-gateway/db"
+	"gocert-gateway/gateway"
 	"gocert-gateway/models"
 	"gocert-gateway/utils"
 	"os"
@@ -31,10 +32,14 @@ func TestIssueCertificate(t *testing.T) {
 
 	indiService := db.NewIndividualService(&b)
 	walletService := db.NewWalletService(&b)
-	contractService := ContractService{}
 
-	cs := NewCertificateService(&b, *indiService, *walletService, contractService)
-	err = cs.IssueCertificate(issuerId, recipientId, &certificates[0], &certificates[1])
+	gw := gateway.GetGateway(*cfg)
+
+	contractService := gateway.NewCertContractService(gw, CHANNEL_NAME, CHAINCODE_NAME, CONTRACT_NAME)
+
+	cs := NewCertificateService(&b, *indiService, *walletService, *contractService)
+	_, err = cs.IssueCertificate(issuerId, recipientId, &certificates[0], &certificates[1])
+
 	if err != nil {
 		t.Error(err)
 		t.Fatal("Failed to issue certificate")
