@@ -1,33 +1,19 @@
 package db
 
 import (
-	"fabric-gateway/models"
 	"fmt"
+	"gocert-gateway/models"
 
 	"github.com/pkg/errors"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 type PostgreWalletService struct {
-	DB *gorm.DB
+	baseDB *BaseDBService
 }
 
-func (p *PostgreWalletService) Connect(host string, user string, password string, dbname string, port string) error {
-	var err error
-
-	// TODO: sslmode
-	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s charset=utf8 parseTime=True", host, port, user, dbname, password)
-	Dbdriver := postgres.Open(dsn)
-
-	p.DB, err = gorm.Open(Dbdriver, &gorm.Config{})
-	if err != nil {
-		fmt.Printf("Cannot connect to %s database", Dbdriver)
-		return fmt.Errorf("Error: %s", err.Error())
-	}
-
-	fmt.Printf("Connected to the %s database", Dbdriver)
-	return nil
+// Initialise a new wallet service with a baseDB instance
+func NewWalletService(baseDB *BaseDBService) *PostgreWalletService {
+	return &PostgreWalletService{baseDB: baseDB}
 }
 
 //		Put an identity into the wallet.
@@ -50,7 +36,7 @@ func (p PostgreWalletService) Put(label string, mspid string, publicKey []byte, 
 		PrivateKey: privateKey,
 	}
 
-	err = p.DB.Debug().Model(&models.Wallet{}).Create(&i).Error
+	err = p.baseDB.DB.Debug().Model(&models.Wallet{}).Create(&i).Error
 	if err != nil {
 		errors.Wrap(err, "Error saving identity to wallet")
 	}
@@ -70,7 +56,7 @@ func (p PostgreWalletService) Get(label string) (*models.Wallet, error) {
 
 	i := models.Wallet{}
 
-	err = p.DB.Debug().Where("label = ?", label).First(&i).Error
+	err = p.baseDB.DB.Debug().Where("label = ?", label).First(&i).Error
 
 	if err != nil {
 		errors.Wrap(err, fmt.Sprintf("Error finding identity with label %s", label))
@@ -115,7 +101,7 @@ func (p PostgreWalletService) Update(label string, mspid string, publicKey []byt
 		i.PrivateKey = privateKey
 	}
 
-	err = p.DB.Debug().Save(&i).Error
+	err = p.baseDB.DB.Debug().Save(&i).Error
 
 	return err
 }
@@ -131,7 +117,7 @@ func (p PostgreWalletService) Exists(label string) bool {
 
 	i := models.Wallet{}
 
-	result := p.DB.Debug().Where("label = ?", label).First(&i)
+	result := p.baseDB.DB.Debug().Where("label = ?", label).First(&i)
 
 	if result.Error != nil {
 		fmt.Errorf(errors.Wrap(result.Error, "Fail to check for identity existence").Error())
@@ -152,7 +138,7 @@ func (p PostgreWalletService) Delete(label string) error {
 
 	i := models.Wallet{}
 
-	err = p.DB.Debug().Where("label = ?", label).First(&i).Delete(&i).Error
+	err = p.baseDB.DB.Debug().Where("label = ?", label).First(&i).Delete(&i).Error
 
 	if err != nil {
 		errors.Wrap(err, fmt.Sprintf("Error deleting identity with label %s", label))

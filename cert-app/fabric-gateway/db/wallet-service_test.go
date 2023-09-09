@@ -6,16 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"fabric-gateway/utils"
-)
-
-const (
-	TEST_DATA_ROOT_PATH = "../../test_data"
-)
-
-var (
-	PK_PATH = filepath.Join(TEST_DATA_ROOT_PATH, "msp", "signcerts", "User1@org1.example.com-cert.pem")
-	SK_PATH = filepath.Join(TEST_DATA_ROOT_PATH, "msp", "keystore", "priv_sk")
+	"gocert-gateway/utils"
 )
 
 func TestPostgreConnection(t *testing.T) {
@@ -24,8 +15,8 @@ func TestPostgreConnection(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	p := PostgreWalletService{}
-	err = p.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+	b := BaseDBService{}
+	err = b.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
 	if err != nil {
 		t.Error(err)
 		t.Fatal("Fail to connect to the database")
@@ -38,12 +29,15 @@ func TestPutIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	p := PostgreWalletService{}
-	err = p.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+	b := BaseDBService{}
+	err = b.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+
 	if err != nil {
 		t.Error(err)
 		t.Fatal("Fail to connect to the database")
 	}
+
+	p := NewWalletService(&b)
 
 	label := "user1"
 	mspid := "Org1MSP"
@@ -66,12 +60,15 @@ func TestGetIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	p := PostgreWalletService{}
-	err = p.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+	b := BaseDBService{}
+	err = b.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+
 	if err != nil {
 		t.Error(err)
 		t.Fatal("Fail to connect to the database")
 	}
+
+	p := NewWalletService(&b)
 
 	label := "user1"
 	expectedMSPID := "Org1MSP"

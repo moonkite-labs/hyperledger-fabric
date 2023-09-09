@@ -8,38 +8,42 @@ import (
 	"testing"
 	"time"
 
-	"fabric-gateway/models"
-	"fabric-gateway/utils"
+	"gocert-gateway/models"
+	"gocert-gateway/utils"
 )
 
-const MOCK_USER_PATH = "../../test_data/mock_data/mock-user.json"
-
 func TestIndividualServiceConnection(t *testing.T) {
-	cfg, err := utils.SetupEnv(filepath.Join("..", utils.ENV_FILE))
+	cfg, err := utils.SetupEnv(ENV_FILE)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	p := PostgreIndividualService{}
-	err = p.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+	b := BaseDBService{}
+	err = b.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+
 	if err != nil {
 		t.Error(err)
 		t.Fatal("Fail to connect to the database")
 	}
+
+	NewIndividualService(&b)
 }
 
 func TestCreateIndividual(t *testing.T) {
-	cfg, err := utils.SetupEnv(filepath.Join("..", utils.ENV_FILE))
+	cfg, err := utils.SetupEnv(ENV_FILE)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	p := PostgreIndividualService{}
-	err = p.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+	b := BaseDBService{}
+	err = b.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+
 	if err != nil {
 		t.Error(err)
 		t.Fatal("Fail to connect to the database")
 	}
+
+	p := NewIndividualService(&b)
 
 	individuals := loadIndividualFromFile(MOCK_USER_PATH)
 	i := individuals[0]
@@ -52,17 +56,20 @@ func TestCreateIndividual(t *testing.T) {
 }
 
 func TestFindIndividualById(t *testing.T) {
-	cfg, err := utils.SetupEnv(filepath.Join("..", utils.ENV_FILE))
+	cfg, err := utils.SetupEnv(ENV_FILE)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	p := PostgreIndividualService{}
-	err = p.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+	b := BaseDBService{}
+	err = b.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+
 	if err != nil {
 		t.Error(err)
 		t.Fatal("Fail to connect to the database")
 	}
+
+	p := NewIndividualService(&b)
 
 	expectedId := uint64(1)
 	expectedWalletId := uint64(1)
@@ -93,17 +100,20 @@ func TestFindIndividualById(t *testing.T) {
 }
 
 func TestInit(t *testing.T) {
-	cfg, err := utils.SetupEnv(filepath.Join("..", utils.ENV_FILE))
+	cfg, err := utils.SetupEnv(ENV_FILE)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	p := PostgreIndividualService{}
-	err = p.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+	b := BaseDBService{}
+	err = b.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+
 	if err != nil {
 		t.Error(err)
 		t.Fatal("Fail to connect to the database")
 	}
+
+	p := NewIndividualService(&b)
 
 	individuals := loadIndividualFromFile(MOCK_USER_PATH)
 	for _, i := range individuals {
@@ -132,7 +142,7 @@ func loadIndividualFromFile(path string) []models.Individual {
 		panic(err)
 	}
 
-	cfg, err := utils.SetupEnv(filepath.Join("..", utils.ENV_FILE))
+	cfg, err := utils.SetupEnv(ENV_FILE)
 
 	if err != nil {
 		fmt.Errorf("Error setting up environment variables")
@@ -153,14 +163,14 @@ func loadIndividualFromFile(path string) []models.Individual {
 }
 
 func loadKeys(pbPath string, pvPath string) ([]byte, []byte) {
-	cert, err := os.ReadFile(filepath.Join("..", "..", filepath.Clean(pbPath)))
+	cert, err := os.ReadFile(filepath.Join("..", filepath.Clean(pbPath)))
 
 	if err != nil {
 		fmt.Errorf("Error reading cert %s", pbPath)
 		panic(err)
 	}
 
-	pvKeyDir, err := os.ReadDir(filepath.Join("..", "..", filepath.Clean(pvPath)))
+	pvKeyDir, err := os.ReadDir(filepath.Join("..", filepath.Clean(pvPath)))
 
 	if err != nil {
 		fmt.Errorf("Error reading keystore directory %s", pvPath)
@@ -168,7 +178,7 @@ func loadKeys(pbPath string, pvPath string) ([]byte, []byte) {
 	}
 
 	file_name := pvKeyDir[0].Name()
-	pvKey, err := os.ReadFile(filepath.Join("..", "..", filepath.Clean(pvPath), file_name))
+	pvKey, err := os.ReadFile(filepath.Join("..", filepath.Clean(pvPath), file_name))
 
 	if err != nil {
 		fmt.Errorf("Error reading keystore file %s", file_name)
@@ -179,7 +189,7 @@ func loadKeys(pbPath string, pvPath string) ([]byte, []byte) {
 }
 
 // func TestMarshalByte(t *testing.T) {
-// 	cfg, _ := utils.SetupEnv(filepath.Join("..", utils.ENV_FILE))
+// 	cfg, _ := utils.SetupEnv(ENV_FILE)
 
 // 	cert, pvKey := loadKeys(cfg.CertPath, cfg.KeystorePath)
 

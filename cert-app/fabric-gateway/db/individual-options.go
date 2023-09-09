@@ -1,7 +1,7 @@
 package db
 
 import (
-	"fabric-gateway/models"
+	"gocert-gateway/models"
 	"time"
 
 	"gorm.io/datatypes"

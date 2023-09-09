@@ -1,35 +1,21 @@
 package db
 
 import (
-	"fabric-gateway/models"
 	"fmt"
+	"gocert-gateway/models"
 	"time"
 
 	"github.com/pkg/errors"
 	"gorm.io/datatypes"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 type PostgreIndividualService struct {
-	DB *gorm.DB
+	baseDB *BaseDBService
 }
 
-func (p *PostgreIndividualService) Connect(host string, user string, password string, dbname string, port string) error {
-	var err error
-
-	// TODO: sslmode
-	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s", host, port, user, dbname, password)
-	Dbdriver := postgres.Open(dsn)
-
-	p.DB, err = gorm.Open(Dbdriver, &gorm.Config{})
-	if err != nil {
-		fmt.Printf("Cannot connect to %s database", Dbdriver)
-		return fmt.Errorf("Error: %s", err.Error())
-	}
-
-	fmt.Printf("Connected to the %s database", Dbdriver)
-	return nil
+// Initialise a new individual service with a baseDB instance
+func NewIndividualService(baseDB *BaseDBService) *PostgreIndividualService {
+	return &PostgreIndividualService{baseDB: baseDB}
 }
 
 //		Store an individual into the database.
@@ -61,7 +47,7 @@ func (p PostgreIndividualService) CreateIndividual(orgId string, cimPersonId str
 		i.Wallet = *wallet
 	}
 
-	err = p.DB.Debug().Model(&models.Individual{}).Create(&i).Error
+	err = p.baseDB.DB.Debug().Model(&models.Individual{}).Create(&i).Error
 	if err != nil {
 		errors.Wrap(err, "Error saving individual to individual")
 	}
@@ -81,7 +67,7 @@ func (p PostgreIndividualService) FindIndividualById(id uint64) (*models.Individ
 
 	i := models.Individual{}
 
-	err = p.DB.Debug().Model(&i).Preload("Wallet").First(&i, id).Error
+	err = p.baseDB.DB.Debug().Model(&i).Preload("Wallet").First(&i, id).Error
 
 	if err != nil {
 		errors.Wrap(err, fmt.Sprintf("Error finding individual with id %d", id))
@@ -96,7 +82,7 @@ func (p PostgreIndividualService) FindIndividualByCimPersonId(cim_person_id stri
 
 	i := models.Individual{}
 
-	err = p.DB.Debug().Model(&i).Preload("Wallet").Where("cim_person_id = ?", cim_person_id).First(&i).Error
+	err = p.baseDB.DB.Debug().Model(&i).Preload("Wallet").Where("cim_person_id = ?", cim_person_id).First(&i).Error
 
 	if err != nil {
 		errors.Wrap(err, fmt.Sprintf("Error finding individual with cim_person_id %s", cim_person_id))
@@ -133,7 +119,7 @@ func (p PostgreIndividualService) UpdateById(id uint64, options ...IndividualOpt
 		o(i)
 	}
 
-	err = p.DB.Debug().Save(&i).Error
+	err = p.baseDB.DB.Debug().Save(&i).Error
 
 	return err
 }
@@ -149,7 +135,7 @@ func (p PostgreIndividualService) ExistsById(id uint64) bool {
 
 	i := models.Individual{}
 
-	result := p.DB.Debug().First(&i, id)
+	result := p.baseDB.DB.Debug().First(&i, id)
 
 	if result.Error != nil {
 		fmt.Errorf(errors.Wrap(result.Error, "Fail to check for individual existence").Error())
@@ -171,7 +157,7 @@ func (p PostgreIndividualService) DeleteById(id uint64) error {
 
 	i := models.Individual{}
 
-	err = p.DB.Debug().Delete(&i, id).Error
+	err = p.baseDB.DB.Debug().Delete(&i, id).Error
 
 	if err != nil {
 		errors.Wrap(err, fmt.Sprintf("Error deleting individual with id %d", id))
