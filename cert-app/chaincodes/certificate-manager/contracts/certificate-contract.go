@@ -38,8 +38,8 @@ func (s *CertificateContract) InitLedger(ctx contractapi.TransactionContextInter
 	return nil
 }
 
-// id string, course string, recipientId string, eventName string, recipientEmail string, recipientName string, individualPersonId string, individualPublicKey []byte, certificateType CertificateType, templateName string, customTemplateUrl string, issuerId string, issuerName string, issuedDate time.Time, expiryDate time.Time, createdDate time.Time, issuedPersonId string, issuerPublicKey []byte, uid string, description string, certificateName string, ownerId string, ownerName string, ownerEmail string, sharedFrom string, masterId string, typeOfCopy CopyType, isValid bool, revokedReason string, badgeUrl string, templateType string, certificateDesc string, status string, templateJson string
-func (s *CertificateContract) CreateCertificate(ctx contractapi.TransactionContextInterface, id string, recipientId string, recipientPublicKey []byte, issuerCertHash string, recipientCertHash string) error {
+// id string, course string, recipientId string, eventName string, recipientEmail string, recipientName string, individualPersonId string, individualPublicKey string, certificateType CertificateType, templateName string, customTemplateUrl string, issuerId string, issuerName string, issuedDate time.Time, expiryDate time.Time, createdDate time.Time, issuedPersonId string, issuerPublicKey string, uid string, description string, certificateName string, ownerId string, ownerName string, ownerEmail string, sharedFrom string, masterId string, typeOfCopy CopyType, isValid bool, revokedReason string, badgeUrl string, templateType string, certificateDesc string, status string, templateJson string
+func (s *CertificateContract) CreateCertificate(ctx contractapi.TransactionContextInterface, id string, recipientId string, recipientPublicKey string, issuerCertHash string, recipientCertHash string) error {
 	exists, err := s.CertificateExists(ctx, id)
 	if err != nil {
 		return err
@@ -49,6 +49,10 @@ func (s *CertificateContract) CreateCertificate(ctx contractapi.TransactionConte
 	}
 
 	orgid, err := ctx.GetClientIdentity().GetMSPID()
+
+	if !s.isIssuer(ctx) {
+		return errors.New("The invoker is not authorised to issue a certificate!")
+	}
 
 	if err != nil {
 		return err
@@ -98,7 +102,7 @@ func (s *CertificateContract) CreateCertificate(ctx contractapi.TransactionConte
 
 // }
 
-// CertificateExists returns true when asset with given ID exists in world state
+// CertificateExists returns true when certificate with given ID exists in world state
 func (s *CertificateContract) CertificateExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	certificateJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
@@ -106,6 +110,33 @@ func (s *CertificateContract) CertificateExists(ctx contractapi.TransactionConte
 	}
 
 	return certificateJSON != nil, nil
+}
+
+func (s *CertificateContract) GetAllCertificates(ctx contractapi.TransactionContextInterface) ([]*Certificate, error) {
+	// range query with empty string for startKey and endKey does an
+	// open-ended query of all certificates in the chaincode namespace.
+	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
+	if err != nil {
+		return nil, err
+	}
+	defer resultsIterator.Close()
+
+	var certificates []*Certificate
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		var certificate Certificate
+		err = json.Unmarshal(queryResponse.Value, &certificate)
+		if err != nil {
+			return nil, err
+		}
+		certificates = append(certificates, &certificate)
+	}
+
+	return certificates, nil
 }
 
 func (s *CertificateContract) isIssuer(ctx contractapi.TransactionContextInterface) bool {
