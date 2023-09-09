@@ -6,6 +6,10 @@ const (
 	ENV_FILE            = "../.env.test"
 	TEST_DATA_ROOT_PATH = "../test_data"
 	CCP_CONFIG_FILE     = "../client-config/config.yaml"
+
+	CHANNEL_NAME   = "certapp"
+	CHAINCODE_NAME = "certificate-manager"
+	CONTRACT_NAME  = "CertificateContract"
 )
 
 var (
