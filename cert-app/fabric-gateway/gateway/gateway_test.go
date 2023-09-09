@@ -1,8 +1,8 @@
-package main
+package gateway
 
 import (
-	"fabric-gateway/config"
 	"fmt"
+	"gocert-gateway/config"
 	"os"
 	"path/filepath"
 	"testing"
