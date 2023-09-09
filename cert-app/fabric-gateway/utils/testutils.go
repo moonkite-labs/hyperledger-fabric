@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"fabric-gateway/config"
+	"gocert-gateway/config"
 
 	"github.com/joho/godotenv"
 )
