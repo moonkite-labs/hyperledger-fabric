@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"flag"
-
 	db "gocert-gateway/db"
 
 	"github.com/hyperledger/fabric-gateway/pkg/client"
@@ -110,81 +108,4 @@ func newGrpcConnection(cfg config.Config) *grpc.ClientConn {
 	}
 
 	return connection
-}
-
-// Get a channel instance from a connected gateway using channel name
-func GetNetwork(gw client.Gateway, channelName string) *client.Network {
-	network := gw.GetNetwork(channelName)
-	return network
-}
-
-// Get a contract instance from a connected channel using chaincode name and contract name
-func GetContract(network client.Network, chaincodeName string, contractName string) *client.Contract {
-	contract := network.GetContractWithName(chaincodeName, contractName)
-	return contract
-}
-
-var Usage = func() {
-	var CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	fmt.Fprintf(CommandLine.Output(), "Usage of %s:\n", os.Args[0])
-	flag.PrintDefaults()
-}
-
-func parseArgs(label *string, ccpPath *string, mspid *string, certPath *string, keystorePath *string) {
-	flag.StringVar(mspid, "mspid", "", "The MSP ID managing the identity")
-	flag.StringVar(label, "label", "", "A unique name to store and get the identity from the wallet")
-	flag.StringVar(ccpPath, "ccpPath", "", "The path to the associated connection profile")
-	flag.StringVar(certPath, "certPath", "", "The path to the signed identity certificate issued by the CA and MSP")
-	flag.StringVar(keystorePath, "keystorePath", "", "The path to the identity's private key issued by the CA and MSP")
-}
-
-func main() {
-	// Some required
-	var label, ccpPath, mspid, certPath, keystorePath string
-	var isEnv = flag.Bool("env", true, "Use environment variables to get the required values")
-	var isNew = flag.Bool("new", false, "Put the new identity into the wallet by label, this argument will not be parsed from env vars")
-	var isHelp = flag.Bool("h", false, "Print help message")
-
-	parseArgs(&label, &ccpPath, &mspid, &certPath, &keystorePath)
-
-	flag.Parse()
-
-	if *isHelp {
-		Usage()
-		os.Exit(0)
-	}
-
-	var cfg config.Config
-	if *isEnv {
-		cfg.ParseEnv()
-	} else {
-
-		cfg = config.Config{
-			MspID:        mspid,
-			CertPath:     certPath,
-			KeystorePath: keystorePath,
-			CCPPath:      ccpPath,
-			Label:        label,
-		}
-	}
-
-	if *isNew {
-		file, err := os.Lstat(keystorePath)
-		utils.CheckError(err)
-
-		// If the given path is a directory, take the first file
-		// (The generated filename is random each time, so giving the directory is easier for testing)
-		if file.IsDir() {
-			files, err := os.ReadDir(cfg.KeystorePath)
-
-			utils.CheckError(err)
-
-			keystorePath = cfg.KeystorePath + files[0].Name()
-		}
-
-		_, err = NewIdentityFromFile(mspid, certPath)
-	}
-
-	gw := GetGateway(cfg)
-	fmt.Printf("Connected to the gateway %+v\n", gw)
 }
