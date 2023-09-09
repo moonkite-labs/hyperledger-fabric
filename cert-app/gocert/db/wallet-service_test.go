@@ -10,7 +10,7 @@ import (
 )
 
 func TestPostgreConnection(t *testing.T) {
-	cfg, err := utils.SetupEnv(utils.ENV_FILE)
+	cfg, err := utils.SetupEnv(ENV_FILE)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func TestPostgreConnection(t *testing.T) {
 }
 
 func TestPutIdentity(t *testing.T) {
-	cfg, err := utils.SetupEnv(utils.ENV_FILE)
+	cfg, err := utils.SetupEnv(ENV_FILE)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,7 +55,7 @@ func TestPutIdentity(t *testing.T) {
 }
 
 func TestGetIdentity(t *testing.T) {
-	cfg, err := utils.SetupEnv(utils.ENV_FILE)
+	cfg, err := utils.SetupEnv(ENV_FILE)
 	if err != nil {
 		t.Fatal(err)
 	}

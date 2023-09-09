@@ -19,7 +19,7 @@ func NewWalletService(baseDB *BaseDBService) *PostgreWalletService {
 //		Put an identity into the wallet.
 //
 //		Parameters:
-//		  label specifies the name of the identity in the wallet.
+//		  label specifies the cim_person_id of the identity in the wallet.
 //	   mspid the associated mspid of the identity
 //		  publicKey the public key of the identity in bytes form.
 //	   privateKey the private key of the identity in bytes form.
@@ -47,7 +47,7 @@ func (p PostgreWalletService) Put(label string, mspid string, publicKey []byte, 
 //	 Get an identity from the wallet.
 //
 //		Parameters:
-//		label specifies the name of the identity in the wallet.
+//		label specifies the cim_person_id of the identity in the wallet.
 //
 //		Returns:
 //		The identity object.
@@ -56,7 +56,7 @@ func (p PostgreWalletService) Get(label string) (*models.Wallet, error) {
 
 	i := models.Wallet{}
 
-	err = p.baseDB.DB.Debug().Where("label = ?", label).First(&i).Error
+	err = p.baseDB.DB.Debug().Where("cim_person_id = ?", label).First(&i).Error
 
 	if err != nil {
 		errors.Wrap(err, fmt.Sprintf("Error finding identity with label %s", label))
@@ -69,7 +69,7 @@ func (p PostgreWalletService) Get(label string) (*models.Wallet, error) {
 //		 Update an identity in the wallet.
 //
 //			Parameters:
-//			label specifies the name of the identity in the wallet.
+//			label specifies the cim_person_id of the identity in the wallet.
 //	     mspid the associated mspid of the identity
 //			publicKey the public key of the identity in bytes form.
 //		    privateKey the private key of the identity in bytes form.
@@ -117,7 +117,7 @@ func (p PostgreWalletService) Exists(label string) bool {
 
 	i := models.Wallet{}
 
-	result := p.baseDB.DB.Debug().Where("label = ?", label).First(&i)
+	result := p.baseDB.DB.Debug().Where("cim_person_id = ?", label).First(&i)
 
 	if result.Error != nil {
 		fmt.Errorf(errors.Wrap(result.Error, "Fail to check for identity existence").Error())
@@ -129,7 +129,7 @@ func (p PostgreWalletService) Exists(label string) bool {
 //	 Delete an identity from the wallet.
 //
 //		Parameters:
-//		label specifies the name of the identity in the wallet.
+//		label specifies the cim_person_id of the identity in the wallet.
 //
 //		Returns:
 //		The identity object.
@@ -138,7 +138,7 @@ func (p PostgreWalletService) Delete(label string) error {
 
 	i := models.Wallet{}
 
-	err = p.baseDB.DB.Debug().Where("label = ?", label).First(&i).Delete(&i).Error
+	err = p.baseDB.DB.Debug().Where("cim_person_id = ?", label).First(&i).Delete(&i).Error
 
 	if err != nil {
 		errors.Wrap(err, fmt.Sprintf("Error deleting identity with label %s", label))
