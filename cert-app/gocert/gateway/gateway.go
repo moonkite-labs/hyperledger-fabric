@@ -96,7 +96,7 @@ func LoadCertificate(path string) (*x509.Certificate, error) {
 
 // newGrpcConnection creates a gRPC connection to the Gateway server.
 func newGrpcConnection(cfg config.Config) *grpc.ClientConn {
-	certificate, err := LoadCertificate(cfg.CertPath)
+	certificate, err := LoadCertificate(cfg.TlsCertPath)
 	utils.CheckError(err)
 	certPool := x509.NewCertPool()
 	certPool.AddCert(certificate)
