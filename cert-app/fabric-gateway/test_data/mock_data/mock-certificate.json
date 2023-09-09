@@ -1,6 +1,6 @@
 [
     {
-        "Id": 1,
+        "Id": "1",
         "Uid": "41935192-f784-4226-b564-32aafb98e41d",
         "MasterId": "00a4e2d1-1ac0-4946-9dee-535122e48692",
         "Course": "infosec",
@@ -34,7 +34,7 @@
         "TemplateJSON": "{nothing}"
     },
     {
-        "Id": 2,
+        "Id": "2",
         "Uid": "00a4e2d1-1ac0-4946-9dee-535122e48692",
         "MasterId": "00a4e2d1-1ac0-4946-9dee-535122e48692",
         "Course": "infosec",
