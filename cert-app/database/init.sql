@@ -81,5 +81,5 @@ CREATE TABLE IF NOT EXISTS Certificates (
     template_type VARCHAR ( 50 ),
     certificate_desc VARCHAR ( 1000 ),
     status VARCHAR ( 20 ),
-    template_json VARCHAR ( 2000 ),
+    template_json VARCHAR ( 2000 )
 );
