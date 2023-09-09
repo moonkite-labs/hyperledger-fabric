@@ -10,15 +10,15 @@ import (
 
 	"flag"
 
-	db "fabric-gateway/service/db"
+	db "gocert-gateway/db"
 
 	"github.com/hyperledger/fabric-gateway/pkg/client"
 	"github.com/hyperledger/fabric-gateway/pkg/identity"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	"fabric-gateway/config"
-	"fabric-gateway/utils"
+	"gocert-gateway/config"
+	"gocert-gateway/utils"
 )
 
 // Create a new X509Identity from associated mspid, issued certificate file and private key file
@@ -33,8 +33,10 @@ func NewIdentityFromFile(mspid string, certpath string) (*identity.X509Identity,
 
 // Return a gateway connected using the given identity
 func GetGateway(cfg config.Config) *client.Gateway {
-	wallet := db.PostgreWalletService{}
-	err := wallet.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+	baseDb := db.BaseDBService{}
+	err := baseDb.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+
+	wallet := db.NewWalletService(&baseDb)
 
 	if err != nil {
 		log.Panic(err.Error())
