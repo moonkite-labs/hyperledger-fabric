@@ -2,8 +2,7 @@ package service
 
 import (
 	"fmt"
-
-	"fabric-gateway/service/db"
+	"gocert-gateway/db"
 
 	mspctx "github.com/hyperledger/fabric-sdk-go/pkg/common/providers/msp"
 )

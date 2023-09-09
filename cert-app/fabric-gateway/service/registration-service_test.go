@@ -4,20 +4,19 @@ import (
 	"fmt"
 	"testing"
 
-	"fabric-gateway/utils"
+	"gocert-gateway/utils"
 
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 )
 
 const (
-	TEST_FILE = "../client-config/config.yaml"
-	ORG_NAME  = "Org1"
-	CA_ID     = "ca-org1"
+	ORG_NAME = "Org1"
+	CA_ID    = "ca-org1"
 )
 
 func TestCreateFabSDK(t *testing.T) {
-	sdk, err := fabsdk.New(config.FromFile(TEST_FILE))
+	sdk, err := fabsdk.New(config.FromFile(CCP_CONFIG_FILE))
 	if err != nil {
 		t.Fatal("Fail to create sdk")
 	}
@@ -25,7 +24,7 @@ func TestCreateFabSDK(t *testing.T) {
 }
 
 func TestCreateRegistrationService(t *testing.T) {
-	cfg, err := utils.SetupEnv(utils.ENV_FILE)
+	cfg, err := utils.SetupEnv(ENV_FILE)
 
 	if err != nil {
 		t.Fatal("Failed to setup environment")
@@ -35,7 +34,7 @@ func TestCreateRegistrationService(t *testing.T) {
 }
 
 func TestEnrollAndRegister(t *testing.T) {
-	cfg, err := utils.SetupEnv(utils.ENV_FILE)
+	cfg, err := utils.SetupEnv(ENV_FILE)
 
 	if err != nil {
 		t.Fatal("Failed to setup environment")

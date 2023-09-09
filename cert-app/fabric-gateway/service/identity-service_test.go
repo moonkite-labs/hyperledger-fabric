@@ -1,37 +1,44 @@
 package service
 
 import (
-	"fabric-gateway/service/db"
-	"fabric-gateway/utils"
+	"gocert-gateway/db"
+	"gocert-gateway/utils"
 	"testing"
 )
 
 func TestCreateNewIdentityService(t *testing.T) {
-	cfg, err := utils.SetupEnv(utils.ENV_FILE)
+	cfg, err := utils.SetupEnv(ENV_FILE)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	p := db.PostgreWalletService{}
-	err = p.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+	b := db.BaseDBService{}
+	err = b.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
+		t.Fatal("Fail to connect to the database")
 	}
 
-	NewIdentityService(p)
+	p := db.NewWalletService(&b)
+
+	NewIdentityService(*p)
 }
 
 func TestSaveNewIdentityFromExistingKeys(t *testing.T) {
-	cfg, err := utils.SetupEnv(utils.ENV_FILE)
+	cfg, err := utils.SetupEnv(ENV_FILE)
 	if err != nil {
 		t.Fatal(err)
+	}
+	b := db.BaseDBService{}
+	err = b.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
+
+	if err != nil {
+		t.Error(err)
+		t.Fatal("Fail to connect to the database")
 	}
 
-	p := db.PostgreWalletService{}
-	err = p.Connect(cfg.DB_HOST, cfg.DB_USER, cfg.DB_PASS, cfg.DB_NAME, cfg.DB_PORT)
-	if err != nil {
-		t.Fatal(err)
-	}
+	p := db.NewWalletService(&b)
 
 	CERT_PEM := `-----BEGIN CERTIFICATE-----
 MIICoDCCAkagAwIBAgIUWppxpretymrcBnFh8ylfvKqujZAwCgYIKoZIzj0EAwIw
@@ -62,7 +69,7 @@ a3oMH8Aorx5PCSiEayJKeEb3ro45wzbAfWOFusAhWU/mnEBQMUJzVVgS
 	mspid := "Org1MSP"
 	username := "User1"
 
-	is := NewIdentityService(p)
+	is := NewIdentityService(*p)
 
 	err = is.CreateAccountFromExistingKeys(mspid, username, cert_bytes, key_bytes)
 

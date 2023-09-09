@@ -5,7 +5,7 @@ import (
 
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
 
-	gwCfg "fabric-gateway/config"
+	gwCfg "gocert-gateway/config"
 
 	mspctx "github.com/hyperledger/fabric-sdk-go/pkg/common/providers/msp"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
