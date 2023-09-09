@@ -1,6 +1,7 @@
 package models
 
 import (
+	"gocert-gateway/utils"
 	"time"
 
 	"github.com/pkg/errors"
@@ -50,4 +51,10 @@ func (i *Wallet) ToSign() (identity.Sign, error) {
 	}
 
 	return sign, nil
+}
+
+// Create a Public Address from public key
+func (i *Wallet) ToPublicAddress() (string, error) {
+	hash, err := utils.SHASumHex(i.PublicKey, 256)
+	return "0x" + hash, err
 }

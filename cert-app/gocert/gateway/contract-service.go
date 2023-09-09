@@ -18,10 +18,11 @@ func NewCertContractService(gw *client.Gateway, channelName string, chaincodeNam
 }
 
 // TODO: ClaimRequest?
-func (cs *CertContractService) IssueCertificate(issuerPersonId string, issuerOrgSigner identity.Sign, masterCertificateId string, issuerHash string, recipientHash string, recipientId string, recipientPublicKey []byte, recipientCertId string) (string, error) {
+func (cs *CertContractService) IssueCertificate(issuerPersonId string, issuerOrgSigner identity.Sign, masterCertificateId string, issuerHash string, recipientHash string, recipientId string, recipientPublicAddress string, recipientCertId string) (string, error) {
 
-	// CreateCertificate args: id string, recipientId string, recipientPublicKey []byte, issuerCertHash string, recipientCertHash string
-	txnProposal, err := cs.contract.NewProposal("CreateCertificate", client.WithArguments([]string{masterCertificateId, recipientId}...), client.WithBytesArguments(recipientPublicKey), client.WithArguments(issuerHash, recipientHash))
+	// CreateCertificate args: id string, recipientId string, recipientPublicKey string, issuerCertHash string, recipientCertHash string
+	// The proposals, edorsement and submission are signed by default
+	txnProposal, err := cs.contract.NewProposal("CreateCertificate", client.WithArguments([]string{masterCertificateId, recipientId, recipientPublicAddress, issuerHash, recipientHash}...))
 	if err != nil {
 		errors.Wrap(err, "Error creating new proposal to create certificate.")
 		return "", err

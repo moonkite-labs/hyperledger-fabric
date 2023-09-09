@@ -4,7 +4,7 @@ type Certificate struct {
 	CertificateId      string `json:"CertificateId"`
 	OrganisationId     string `json:"OrganisationId"`
 	RecipientId        string `json:"RecipientId"`
-	RecipientPublicKey []byte `json:"RecipientPublicKey"`
+	RecipientPublicKey string `json:"RecipientPublicKey"`
 	IssuerCertHash     string `json:"IssuerCertHash"`
 	RecipientCertHash  string `json:"RecipientCertHash"`
 }

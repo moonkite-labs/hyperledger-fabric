@@ -12,7 +12,7 @@ type Certificate struct {
 	RecipientName string `json:"RecipientName"`
 	// RecipientId
 	IndividualPersonId  string          `json:"IndividualPersonId"`
-	IndividualPublicKey []byte          `json:"IndividualPublicKey"`
+	IndividualPublicKey string          `json:"IndividualPublicKey"`
 	CertificateType     CertificateType `json:"CertificateType"`
 	TemplateName        string          `json:"TemplateName"`
 	CustomTemplateUrl   string          `json:"CustomTemplateUrl"`
@@ -24,7 +24,7 @@ type Certificate struct {
 	CreatedDate time.Time `json:"CreatedDate"`
 	// Organisation admin
 	IssuedPersonId  string `json:"IssuedPersonId"`
-	IssuerPublicKey []byte `json:"IssuerPublicKey"`
+	IssuerPublicKey string `json:"IssuerPublicKey"`
 	Uid             string `json:"Uid"`
 	Description     string `json:"Description"`
 	CertificateName string `json:"CertificateName"`

@@ -148,7 +148,7 @@ func (cs *CertificateService) IssueCertificate(requesterCimPersonId string, reci
 		return "", err
 	}
 
-	recipientPublicKey := recipient.Wallet.PublicKey
+	recipientPublicAddress, err := recipient.Wallet.ToPublicAddress()
 
 	if err != nil {
 		return "", err
@@ -182,5 +182,5 @@ func (cs *CertificateService) IssueCertificate(requesterCimPersonId string, reci
 		return "", err
 	}
 
-	return cs.contractService.IssueCertificate(requesterCimPersonId, signer, issuerCert.Id, issuerCertHash, recipientCertHash, recipientCimPersonId, recipientPublicKey, rCert.Id)
+	return cs.contractService.IssueCertificate(requesterCimPersonId, signer, issuerCert.Id, issuerCertHash, recipientCertHash, recipientCimPersonId, recipientPublicAddress, rCert.Id)
 }
