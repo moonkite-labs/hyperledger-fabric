@@ -150,7 +150,7 @@ func loadIndividualFromFile(path string) []models.Individual {
 	}
 
 	cert, pvKey := loadKeys(cfg.CertPath, cfg.KeystorePath)
-	CRYPTO_PATH := "../../test-network/organizations/peerOrganizations/org2.example.com"
+	CRYPTO_PATH := "../../../test-network/organizations/peerOrganizations/org2.example.com"
 	CERT_PATH2 := filepath.Join(CRYPTO_PATH, "/users/User1@org2.example.com/msp/signcerts/cert.pem")
 	KEYSTORE_PATH2 := filepath.Join(CRYPTO_PATH, "/users/User1@org2.example.com/msp/keystore")
 	cert2, pvKey2 := loadKeys(CERT_PATH2, KEYSTORE_PATH2)
@@ -163,14 +163,14 @@ func loadIndividualFromFile(path string) []models.Individual {
 }
 
 func loadKeys(pbPath string, pvPath string) ([]byte, []byte) {
-	cert, err := os.ReadFile(filepath.Join("..", filepath.Clean(pbPath)))
+	cert, err := os.ReadFile(filepath.Join(filepath.Clean(pbPath)))
 
 	if err != nil {
 		fmt.Errorf("Error reading cert %s", pbPath)
 		panic(err)
 	}
 
-	pvKeyDir, err := os.ReadDir(filepath.Join("..", filepath.Clean(pvPath)))
+	pvKeyDir, err := os.ReadDir(filepath.Join(filepath.Clean(pvPath)))
 
 	if err != nil {
 		fmt.Errorf("Error reading keystore directory %s", pvPath)
@@ -178,7 +178,7 @@ func loadKeys(pbPath string, pvPath string) ([]byte, []byte) {
 	}
 
 	file_name := pvKeyDir[0].Name()
-	pvKey, err := os.ReadFile(filepath.Join("..", filepath.Clean(pvPath), file_name))
+	pvKey, err := os.ReadFile(filepath.Join(filepath.Clean(pvPath), file_name))
 
 	if err != nil {
 		fmt.Errorf("Error reading keystore file %s", file_name)
