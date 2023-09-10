@@ -4,8 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hyperledger/fabric-sdk-go/pkg/client/msp"
-
-	gwCfg "gocert-gateway/config"
+	"github.com/pkg/errors"
 
 	mspctx "github.com/hyperledger/fabric-sdk-go/pkg/common/providers/msp"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
@@ -28,16 +27,16 @@ type RegistrationService struct {
 	caclient *msp.Client
 }
 
-func NewRegistrationService(cfg gwCfg.Config, orgname string, caid string) *RegistrationService {
-	sdk, err := fabsdk.New(config.FromFile(cfg.CCPPath))
+func NewRegistrationService(config_path string, orgname string, caid string) (*RegistrationService, error) {
+	sdk, err := fabsdk.New(config.FromFile(config_path))
 	if err != nil {
-		printError(err, "Fail to create sdk")
+		return nil, errors.Wrap(err, "Fail to create sdk")
 	}
 	caclient, err := createCACalient(sdk, msp.WithCAInstance(caid), msp.WithOrg(orgname))
 	if err != nil {
-		printError(err, "Fail to create sdk")
+		return nil, errors.Wrap(err, "Fail to create sdk")
 	}
-	return &RegistrationService{sdk: sdk, caclient: caclient}
+	return &RegistrationService{sdk: sdk, caclient: caclient}, nil
 }
 
 func createCACalient(sdk *fabsdk.FabricSDK, options ...msp.ClientOption) (*msp.Client, error) {

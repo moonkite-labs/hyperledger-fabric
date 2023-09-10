@@ -1,6 +1,8 @@
 package service
 
-import "path/filepath"
+import (
+	"path/filepath"
+)
 
 const (
 	ENV_FILE            = "../.env.test"
