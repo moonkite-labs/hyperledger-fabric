@@ -1,0 +1,58 @@
+@startuml CAClientAPI
+
+skin rose
+
+struct RegistrationRequest {
+	- Name: string
+	- Type: string
+	- Secret: string
+	- MaxEnrollments: int
+    - Affiliation: string
+	- Attributes: []Attribute
+	- CAName: string
+    + string String()
+}
+
+struct RegistrationResponse {
+	- Secret: string
+}
+
+struct Idemix {
+	- Curve: string 
+}
+
+struct EnrollmentRequest {
+	- Name: string
+	- Secret: string
+	- CAName: string 
+	- AttrReqs: []*AttributeRequest 
+	- Profile: string
+	- Label: string 
+	- CSR: *CSRInfo 
+	- Type: string 
+    + string String()
+}
+
+struct ReenrollmentRequest {
+	- Profile: string
+	- Label: string
+	- CSR: *CSRInfo
+	- CAName: string
+	- AttrReqs: []*AttributeRequest
+}
+
+struct RevocationRequest {
+    - Name: string 
+	- Serial: string 
+	- AKI: string 
+	- Reason: string 
+	- CAName: string 
+	- GenCRL: bool
+}
+
+struct RevocationResponse {
+	- RevokedCerts: []RevokedCert
+	- CRL: []byte
+}
+
+@enduml

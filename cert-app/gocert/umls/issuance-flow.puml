@@ -1,0 +1,47 @@
+@startuml
+
+skin rose
+
+actor Issuer
+actor Recipient
+participant Config
+participant Gateway
+participant CertificateService
+participant IndividualService
+participant ContractService
+participant CertificateContract
+participant WorldState
+
+Issuer -> Config: Configure credentials, CimPersonId
+
+activate Gateway
+Issuer -> Gateway: Initialise a gateway connection to blockchain
+Gateway -> Config: Retrieve configuration
+Gateway -> Gateway: Initialise GRPC connection
+Gateway -> Issuer: Return a fabric client gateway
+
+activate CertificateService
+Issuer -> CertificateService: Request issue Certificate
+
+activate IndividualService
+CertificateService -> IndividualService: Retrieve issuer individual
+IndividualService -> CertificateService: Return issuer individual
+CertificateService -> IndividualService: Retireve recipient individual
+IndividualService -> CertificateService: Return recipient individual
+deactivate IndividualService
+
+CertificateService -> CertificateService: Create a new Certificate
+
+activate ContractService
+CertificateService -> ContractService: Proposal to issue certificate
+ContractService -> CertificateContract: Create certificate issuance record
+CertificateContract -> WorldState: Commit transaction and store to world state
+ContractService -> CertificateService: Return transaction hash
+deactivate ContractService
+
+CertificateService -> Issuer: Certificate successfully issued
+CertificateService -> Recipient: Certificate successfully issued
+deactivate CertificateService  
+
+deactivate Gateway
+@enduml

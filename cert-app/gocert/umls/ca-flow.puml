@@ -1,0 +1,39 @@
+@startuml
+
+skin rose
+
+actor User
+participant RegistrationService
+participant IdentityProvider
+participant WalletService
+participant FabricCA
+participant HyperledgerFabric
+
+User -> RegistrationService: Register Account
+RegistrationService -> IdentityProvider: Registration Request
+
+activate IdentityProvider
+IdentityProvider -> FabricCA: Register Identity
+FabricCA -> IdentityProvider: Registration Status
+
+IdentityProvider -> FabricCA: Enroll Identity via Certificate Signing Request (CSR)
+deactivate IdentityProvider
+
+FabricCA -> FabricCA: Sign CSR to Generate Certificate
+FabricCA -> WalletService: X509 Cert (Public Key) and Private Key Generated
+
+activate IdentityProvider
+WalletService -> IdentityProvider: Return X509 Cert (Public Key)
+IdentityProvider -> IdentityProvider: Parse User Account Details
+IdentityProvider -> WalletService: Request User Account Generation
+deactivate IdentityProvider
+
+activate WalletService
+WalletService -> User: Request labelling this account
+User -> WalletService: Provides label (Unique for this wallet)
+WalletService -> HyperledgerFabric: Create User Account
+HyperledgerFabric -> WalletService: User Account Creation Status
+WalletService -> User: User Account Created
+deactivate WalletService
+
+@enduml

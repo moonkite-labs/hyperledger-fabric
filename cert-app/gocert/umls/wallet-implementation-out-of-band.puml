@@ -1,0 +1,24 @@
+@startuml
+skin rose
+actor User
+
+participant RegistrationService
+participant CAClient
+User -> RegistrationService: Configures organisation and CA details
+activate CAClient
+RegistrationService -> CAClient: Parse configs & create CA Client
+User -> CAClient: Provides credentials (ECert and PvKey)
+activate CAServer
+CAClient -> CAServer: Get CA Info
+CAServer -> CAClient: Returns CA Info
+CAClient -> CAClient: Verifies provided credentials
+CAClient -> RegistrationService: Verification result
+deactivate CAServer
+deactivate CAClient
+
+RegistrationService -> IdentityService: (If valid) Pass user crypto details
+IdentityService -> IndividualService: Request individual creation
+IndividualService -> WalletService:  Wallet identity creation
+WalletService -> Database: Store account into a wallet
+WalletService -> User: Account successfully created
+@enduml
