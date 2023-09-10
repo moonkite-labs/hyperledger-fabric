@@ -2,6 +2,9 @@
 bin/
 builders/
 
+# Built chaincode packages
+vendor/
+
 # Wallet
 wallet/
 
@@ -13,3 +16,4 @@ test-network/temporg/*
 peerOrganizations/*
 ordererOrganizations/*
 *.key
+

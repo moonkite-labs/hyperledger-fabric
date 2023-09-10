@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "cert-app/chaincodes"
+		},
+		{
+			"path": "cert-app/gocert"
+		}
+	],
+	"settings": {}
+}

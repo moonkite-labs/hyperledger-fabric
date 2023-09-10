@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS Certificates (
     recipient_email VARCHAR ( 50 ) UNIQUE NOT NULL,
     recipient_name VARCHAR ( 200 ), -- first name and last name
     individual_person_id VARCHAR ( 50 ) NOT NULL,
-    individual_public_key BYTEA UNIQUE NOT NULL,
+    individual_public_key VARCHAR ( 100 ) UNIQUE NOT NULL,
     certificate_type INT NOT NULL,
     template_name VARCHAR ( 50 ) NOT NULL,
     custom_template_url VARCHAR ( 200 ) NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS Certificates (
     expiry_date TIMESTAMP NOT NULL,
     created_date TIMESTAMP NOT NULL,
     issued_person_id VARCHAR ( 50 ) NOT NULL, -- organisation admin (FK)
-    issuer_public_key BYTEA UNIQUE NOT NULL,
+    issuer_public_key VARCHAR ( 100 ) UNIQUE NOT NULL,
     uid VARCHAR ( 200 ) UNIQUE NOT NULL,
     description VARCHAR ( 1000 ) NOT NULL,
     certificate_name VARCHAR ( 50 ) NOT NULL,
@@ -81,5 +81,5 @@ CREATE TABLE IF NOT EXISTS Certificates (
     template_type VARCHAR ( 50 ),
     certificate_desc VARCHAR ( 1000 ),
     status VARCHAR ( 20 ),
-    template_json VARCHAR ( 2000 ),
+    template_json VARCHAR ( 2000 )
 );

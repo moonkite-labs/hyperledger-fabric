@@ -1,0 +1,11 @@
+	Id                uint64 `gorm:"primaryKey;auto_increment"`
+	OrgId             string
+	CimPersonId       string
+	CimOrganisationId string
+	Country           string
+	FirstName         string
+	LastName          string
+	PictureUrl        string
+	DateOfBirth       time.Time
+	OrgName           string
+	CreatedAt         time.Time `gorm:"autoCreateTime"`
