@@ -44,13 +44,13 @@ client:
 #      selection: 10m
 
   cryptoconfig: # Root of the MSP directories with keys and certs
-    path: "${GOPATH}/src/github.com/hyperledger-fabric/test-network/organizations"
+    path: "${FABRIC_SDK_GO_PROJECT_PATH}/../../test-network/organizations"
 
   credentialStore: # The path to store generated public key
-    path: "${GOPATH}/src/github.com/hyperledger-fabric/test-network/organizations/peerOrganizations/org1.example.com/users/{username}@org1.example.com/msp/signcerts"
+    path: "/tmp/msp/signcerts"
 
     cryptoStore: # Where to store the generated keystore, final path would be "$path/keystore"
-      path: "${GOPATH}/src/github.com/hyperledger-fabric/test-network/organizations/peerOrganizations/org1.example.com/users/{username}@org1.example.com/msp"
+      path: "/tmp/msp"
 
 organizations:
   Org1:
@@ -73,7 +73,7 @@ certificateAuthorities:
     grpcOptions: 
       verify: true
     tlsCACerts:
-      path: "${GOPATH}/src/github.com/hyperledger-fabric/test-network/organizations/fabric-ca/org1/tls-cert.pem"
+      path: "${FABRIC_SDK_GO_PROJECT_PATH}/../../test-network/organizations/fabric-ca/org1/tls-cert.pem"
 
     registrar:
         enrollId: "admin"
