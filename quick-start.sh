@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker-compose -f ./cert-app/database/docker-compose-postgres.yaml up
+docker-compose -f ./cert-app/database/docker-compose-postgres.yaml up &
 
 ./net.sh up createChannel -ca -c certapp -s couchdb
 

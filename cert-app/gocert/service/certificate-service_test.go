@@ -38,12 +38,14 @@ func TestIssueCertificate(t *testing.T) {
 	contractService := gateway.NewCertContractService(gw, CHANNEL_NAME, CHAINCODE_NAME, CONTRACT_NAME)
 
 	cs := NewCertificateService(&b, *indiService, *walletService, *contractService)
-	_, err = cs.IssueCertificate(issuerId, recipientId, &certificates[0], &certificates[1])
+	txHash, err := cs.IssueCertificate(issuerId, recipientId, &certificates[0], &certificates[1])
 
 	if err != nil {
 		t.Error(err)
 		t.Fatal("Failed to issue certificate")
 	}
+
+	fmt.Println(txHash)
 }
 
 func loadCertificateFromFile(path string) []models.Certificate {
